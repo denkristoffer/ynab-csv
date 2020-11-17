@@ -59,7 +59,8 @@ window.DataObject = class DataObject {
   // lookup: hash definition of YNAB column names to selected base column names. Lets us
   //     convert the uploaded CSV file into the columns that YNAB expects.
   // inverted_outflow: if true, positive values represent outflow while negative values represent inflow
-  converted_json(limit, ynab_cols, lookup, inverted_outflow = false) {
+  // normalize_date: false leaves date as is, true outputs it as YYYY-MM-DD
+  converted_json(limit, ynab_cols, lookup, inverted_outflow = false, normalize_date = false) {
     var value;
     if (this.base_json === null) {
       return null;
@@ -101,6 +102,22 @@ window.DataObject = class DataObject {
                     tmp_row[col] = cell;
                   }
                   break;
+                case "Date":
+                  if (normalize_date) {
+                    var d = new Date(cell),
+                        month = '' + (d.getMonth() + 1),
+                        day = '' + d.getDate(),
+                        year = d.getFullYear();
+                
+                    if (month.length < 2) 
+                        month = '0' + month;
+                    if (day.length < 2) 
+                        day = '0' + day;
+                    tmp_row[col] = [year, month, day].join('-');
+                  } else {
+                    tmp_row[col] = cell;
+                  }
+                  break;
                 default:
                   tmp_row[col] = cell;
               }
@@ -113,14 +130,14 @@ window.DataObject = class DataObject {
     return value;
   }
 
-  converted_csv(limit, ynab_cols, lookup, inverted_outflow) {
+  converted_csv(limit, ynab_cols, lookup, inverted_outflow, normalize_date) {
     var string;
     if (this.base_json === null) {
       return nil;
     }
     // Papa.unparse string
     string = '"' + ynab_cols.join('","') + '"\n';
-    this.converted_json(limit, ynab_cols, lookup, inverted_outflow).forEach(function (row) {
+    this.converted_json(limit, ynab_cols, lookup, inverted_outflow, normalize_date).forEach(function (row) {
       var row_values;
       row_values = [];
       ynab_cols.forEach(function (col) {
