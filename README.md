@@ -1,52 +1,41 @@
-# ynab-csv
+# TypeScript Next.js example
 
+This is a really simple project that shows the usage of Next.js with TypeScript.
 
-Tool for making your CSV files ready to import into YNAB.
+## Deploy your own
 
-http://aniav.github.io/ynab-csv/
+Deploy the example using [Vercel](https://vercel.com):
 
-**NOTE:** currently works best in Chrome. See "Known Issues" below for more details.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/vercel/next.js/tree/canary/examples/with-typescript)
 
+## How to use it?
 
-## How to Use
+Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
 
-1. Visit the link above.
-2. Drop or select the the csv file you want to make ready for YNAB.
-3. For each column in the YNAB data file, choose which column you want to pull from your source data file.
-4. Save the new YNAB file and you are ready to import that right into YNAB!
+```bash
+npx create-next-app --example with-typescript with-typescript-app
+# or
+yarn create next-app --example with-typescript with-typescript-app
+```
 
-## Multiple Profiles
+Deploy it to the cloud with [Vercel](https://vercel.com/import?filter=next.js&utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
 
-`ynab-csv` stores your settings in the browser under a profile named `default`. Each time you change your column mapping or other
-settings, the new settings will be saved.
+## Notes
 
-A new profile can be created by adding `?profile=<profile name>` to the link above. For example, `?profile=paypal` would create a
-new profile named `paypal`. Then, column mappings will be saved to that profile instead.
+This example shows how to integrate the TypeScript type system into Next.js. Since TypeScript is supported out of the box with Next.js, all we have to do is to install TypeScript.
 
-You can switch between profiles by selecting the profile from the dropdown or by typing `?profile=<profile name>` directly in
-the browser address bar.
+```
+npm install --save-dev typescript
+```
 
-## Privacy
+To enable TypeScript's features, we install the type declarations for React and Node.
 
-Your data never leaves your computer. All the processing happens locally. This is part of the reason Firefox and Safari have issues saving the new file.
+```
+npm install --save-dev @types/react @types/react-dom @types/node
+```
 
+When we run `next dev` the next time, Next.js will start looking for any `.ts` or `.tsx` files in our project and builds it. It even automatically creates a `tsconfig.json` file for our project with the recommended settings.
 
-## Known Issues
+Next.js has built-in TypeScript declarations, so we'll get autocompletion for Next.js' modules straight away.
 
-**Safari** will save the file with the filename as `Unknown`. For best support use **Chrome** for now.
-
-## Reporting Issues
-
-If you have any other issues or suggestions, go to https://github.com/aniav/ynab-csv/issues and create an issue if one doesn't already exist. If the issue has to do with your csv file, please create a new gist (https://gist.github.com/) with the content of the CSV file and share the link in the issue. If you tweak the CSV file before sharing, just make sure whatever version you end up sharing still causes the problem you describe.
-
-## Contribute
-
-1. Fork and clone the project
-2. `cd` into project
-3. Run `npm install`   # You will need to install node and npm if it is not already
-4. Run `npm start`   # when running in Windows, modify package.json and replace "open" with "start"
-  * Optional: run `npm run bs` instead to use [Browsersync](https://browsersync.io/)
-5. Make your changes locally and test them to make sure they work
-6. Commit those changes and push to your forked repository
-7. Make a new pull request
-
+A `type-check` script is also added to `package.json`, which runs TypeScript's `tsc` CLI in `noEmit` mode to run type-checking separately. You can then include this, for example, in your `test` scripts.

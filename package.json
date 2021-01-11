@@ -1,31 +1,32 @@
 {
-  "name": "ynab-csv",
-  "version": "2.0.0",
-  "description": "Tool for making your CSV files ready to import into YNAB online",
-  "main": "server.js",
+  "name": "with-typescript",
+  "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "open http://localhost:3000/ && node server.js",
-    "bs": "browser-sync . -w"
+    "dev": "next",
+    "build": "next build",
+    "lint": "eslint .",
+    "start": "next start",
+    "type-check": "tsc"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/aniav/ynab-csv.git"
-  },
-  "keywords": [
-    "ynab",
-    "csv"
-  ],
   "dependencies": {
-    "express": "^4.16.4"
+    "@types/papaparse": "^5.2.4",
+    "autoprefixer": "^10.1.0",
+    "dayjs": "^1.9.8",
+    "next": "latest",
+    "papaparse": "^5.3.0",
+    "postcss": "^8.2.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-dropzone": "^11.2.4",
+    "tailwindcss": "^2.0.2"
   },
-  "author": "Ryan Hall",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/aniav/ynab-csv/issues"
-  },
-  "homepage": "https://github.com/aniav/ynab-csv",
   "devDependencies": {
-    "browser-sync": "^2.26.7"
-  }
+    "@denkristoffer/eslint-config": "^8.1.0",
+    "@types/node": "^12.12.21",
+    "@types/react": "^16.9.16",
+    "@types/react-dom": "^16.9.4",
+    "eslint": "^7.16.0",
+    "typescript": "4.0"
+  },
+  "license": "MIT"
 }
