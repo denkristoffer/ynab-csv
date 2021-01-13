@@ -40,7 +40,7 @@ const downloadStringAsFile = async (
   URL.revokeObjectURL(url);
 };
 
-const Th = (props) => (
+const Th = (props: any) => (
   <Td className="text-left font-semibold px-0" element="th" {...props} />
 );
 
