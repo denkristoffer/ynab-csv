@@ -15,7 +15,9 @@ export default function Dropzone({
   const onDrop = useCallback(
     (files: File[]) => {
       files.forEach((file) => {
-        callback(file);
+        if (file.name.endsWith(".csv")) {
+          callback(file);
+        }
       });
     },
     [callback]
