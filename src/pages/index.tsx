@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
+import { cleanDkb, isDkb } from "../lib/data";
 import { useAsyncState } from "../lib/hooks";
 import Dropzone from "../components/dropzone";
 import Table from "../components/table";
@@ -43,26 +44,6 @@ const downloadStringAsFile = async (
 const Th = (props: any) => (
   <Td className="text-left font-semibold px-0" element="th" {...props} />
 );
-
-const isDkb = (text: string): boolean => {
-  const lines = text.split("\n");
-  const regexp = new RegExp(/"Kontonummer:";"/);
-  const matches = regexp.exec(lines[0]);
-
-  return matches !== null;
-};
-
-/**
- * Discards the lines with additional info that DKB adds to CSV exports
- *
- * @param string
- */
-const cleanDkb = (text: string): string => {
-  const lines = text.split("\n");
-  const wantedLines = lines.slice(6);
-
-  return wantedLines.join("\n");
-};
 
 const SAMPLE_DATA_ROWS = 10;
 
