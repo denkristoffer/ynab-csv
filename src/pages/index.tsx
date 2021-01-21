@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Head from "next/head";
 import { parse } from "papaparse";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -11,6 +12,11 @@ import Table from "../components/table";
 import type { Row } from "../components/table";
 import Td from "../components/tableCell";
 import DownloadButton from "../components/downloadButton";
+import { createStorage, readFromStorage, writeToStorage } from "../lib/storage";
+
+const storage = createStorage();
+const getStorage = readFromStorage(storage);
+const setStorage = writeToStorage(storage);
 
 const downloadUrlAsFile = (
   objectUrl: string,
@@ -47,6 +53,12 @@ const Th = (props: any) => (
 
 const SAMPLE_DATA_ROWS = 10;
 
+interface Config {
+  maps: {
+    [key: string]: string;
+  };
+}
+
 interface ColumnMap {
   Date: string;
   Payee: string;
@@ -70,6 +82,40 @@ export default function IndexPage(): React.ReactElement {
   const isTransformed = useMemo(() => {
     return Object.values(csvColumnMap).some((value) => value !== "");
   }, [csvColumnMap]);
+
+  useEffect(() => {
+    if (csvColumns.length > 0) {
+      const configItem = getStorage("config");
+
+      if (configItem) {
+        const config = JSON.parse(configItem) as Config;
+        const columnsToFindMapBy = JSON.stringify(csvColumns);
+        const existingMap = config.maps[columnsToFindMapBy];
+
+        if (existingMap) {
+          setCsvColumnMap(JSON.parse(existingMap));
+        }
+      }
+    }
+  }, [csvColumns]);
+
+  useEffect(() => {
+    if (isTransformed) {
+      const configItem = getStorage("config");
+      let config = { maps: {} };
+
+      if (configItem) {
+        config = JSON.parse(configItem) as Config;
+      }
+
+      config.maps = {
+        ...config.maps,
+        [JSON.stringify(csvColumns)]: JSON.stringify(csvColumnMap),
+      };
+
+      setStorage("config", JSON.stringify(config));
+    }
+  }, [csvColumns, csvColumnMap, isTransformed]);
 
   const parseCsv = useCallback(
     async (file: File, preview: boolean | undefined = true) => {
@@ -201,15 +247,20 @@ export default function IndexPage(): React.ReactElement {
   );
 
   const hasData = data.current.length > 0;
-  const ynabColumns = Object.keys(csvColumnMap);
 
   return (
-    <div className="container h-full w-full bg-white max-w-none dark:bg-gray-800">
-      <Dropzone hasFile={hasData} onDrop={parseCsv}>
-        {hasData ? (
-          <div className="flex flex-col h-full">
-            {isTransformed ? (
+    <>
+      <Head>
+        <title>YNAB CSV</title>
+      </Head>
+
+      <div className="container h-full w-full bg-white max-w-none dark:bg-gray-800">
+        <Dropzone hasFile={hasData} onDrop={parseCsv}>
+          {hasData ? (
+            <div className="flex flex-col h-full">
               <DownloadButton
+                aria-hidden={!isTransformed}
+                className={isTransformed ? "opacity-100" : "opacity-0"}
                 isActive={isLoading}
                 onClick={() => {
                   setIsLoading(true);
@@ -218,59 +269,67 @@ export default function IndexPage(): React.ReactElement {
                   void downloadStringAsFile(csv, "ynab-data.csv");
                 }}
               />
-            ) : null}
 
-            <Table
-              data={isTransformed ? previewData : []}
-              header={
-                <thead>
-                  <tr className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
-                    {ynabColumns.map((column) => {
-                      return (
-                        <Th key={column}>
-                          <div>{column}</div>
-                          <div>
-                            <select
-                              className="w-full"
-                              onChange={(event) => {
-                                const value = event.target.value || "";
+              <Table
+                data={isTransformed ? previewData : []}
+                header={
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
+                      {Object.keys(csvColumnMap).map((key) => {
+                        const column = key as keyof ColumnMap;
 
-                                setCsvColumnMap((current) => {
-                                  return {
-                                    ...current,
-                                    [column]: value,
-                                  };
-                                });
-                              }}
-                            >
-                              <option value="">Select column&hellip;</option>
-                              {csvColumns.map((column) => {
-                                return (
-                                  <option key={column} value={column}>
-                                    {column}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
-                        </Th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-              }
-            />
+                        return (
+                          <Th key={column}>
+                            <div>{column}</div>
+                            <div>
+                              <select
+                                className="w-full"
+                                onChange={(event) => {
+                                  const value = event.target.value || "";
 
-            <div className="flex items-center h-full w-full">
-              <p className="text-center w-full dark:text-white">
-                {isTransformed
-                  ? `Previewing the first ${SAMPLE_DATA_ROWS} rows.`
-                  : "Select columns to preview data."}
-              </p>
+                                  setCsvColumnMap((current) => {
+                                    return {
+                                      ...current,
+                                      [column]: value,
+                                    };
+                                  });
+                                }}
+                              >
+                                <option value="">Select column&hellip;</option>
+                                {csvColumns.map((csvColumn) => {
+                                  return (
+                                    <option
+                                      key={csvColumn}
+                                      value={csvColumn}
+                                      selected={
+                                        csvColumnMap[column] === csvColumn
+                                      }
+                                    >
+                                      {csvColumn}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                            </div>
+                          </Th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                }
+              />
+
+              <div className="flex items-center h-full w-full">
+                <p className="text-center w-full dark:text-white">
+                  {isTransformed
+                    ? `Previewing the first ${SAMPLE_DATA_ROWS} rows.`
+                    : "Select columns to preview data."}
+                </p>
+              </div>
             </div>
-          </div>
-        ) : null}
-      </Dropzone>
-    </div>
+          ) : null}
+        </Dropzone>
+      </div>
+    </>
   );
 }
